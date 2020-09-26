@@ -1,52 +1,83 @@
-pub fn impl_otto_vec_macro(ast: syn::ItemFn) -> proc_macro::TokenStream {
-    let function_name = parse_ident(&ast);
-    let function_generics = parse_generics(&ast);
-    let (function_arguments_name, function_arguments_name_vec, function_arguments_type) =
-        parse_arguments(&ast);
-    let size = function_arguments_name.len();
-    let function_return_type = parse_return(&ast);
-    let function_body = parse_body(&ast);
-    proc_macro::TokenStream::from(quote::quote! {
-        #ast
-        pub fn
-        #function_name
-        #function_generics
-        (#(
-            mut #function_arguments_name_vec : std::vec::Vec<#function_arguments_type>
-        ),*)
-        ->
-        std::vec::Vec<#function_return_type> {
-            #(
-                #function_arguments_name_vec.reverse();
-            )*
-            let mut sizes = std::vec::Vec::with_capacity(#size);
-            #(sizes.push(#function_arguments_name_vec.len()));*;
-            if sizes.iter().all(|x| x.eq(sizes.first().unwrap())) {
-                let size = sizes.first().unwrap();
-                let mut result = std::vec::Vec::with_capacity(#size);
-                for i in 0..*size {
-                    #(
-                        let mut #function_arguments_name = #function_arguments_name_vec.pop().unwrap();
-                    )*
-                    result.push((||{
-                        #function_body
-                    })())
+enum ArgumentType {
+    Alone(syn::Ident),
+    Tuple(syn::punctuated::Punctuated<syn::Pat, syn::Token![,]>),
+}
+
+impl From<ArgumentType> for proc_macro2::TokenStream {
+    fn from(from: ArgumentType) -> Self {
+        match from {
+            ArgumentType::Alone(ident) => {
+                let name = extend_ident_with_vec(&ident);
+                quote::quote! {
+                    #name
                 }
-                result
-            } else {
-                panic!("size of vectors are not equal.");
             }
+            _ => panic!("helo"),
         }
-    })
+    }
+}
+
+fn extend_ident_with_vec(ident: &syn::Ident) -> syn::Ident {
+    syn::Ident::new(&format!("{}_vec", ident), ident.span())
+}
+
+pub fn impl_otto_vec_macro(ast: syn::ItemFn) -> proc_macro::TokenStream {
+    if parse_arguments_number(&ast) == 0 {
+        panic!("Function must have at least 1 argument.")
+    } else {
+        let function_name = parse_ident(&ast);
+        let function_generics = parse_generics(&ast);
+        let (function_arguments_name, function_arguments_name_vec, function_arguments_type) =
+            parse_arguments(&ast);
+        let size = function_arguments_name.len();
+        let function_return_type = parse_return(&ast);
+        let function_body = parse_body(&ast);
+        proc_macro::TokenStream::from(quote::quote! {
+            #ast
+            pub fn
+            #function_name
+            #function_generics
+            (#(
+                mut #function_arguments_name_vec : std::vec::Vec<#function_arguments_type>
+            ),*)
+            ->
+            std::vec::Vec<#function_return_type> {
+                #(
+                    #function_arguments_name_vec.reverse();
+                )*
+                let mut sizes = std::vec::Vec::with_capacity(#size);
+                #(sizes.push(#function_arguments_name_vec.len()));*;
+                if sizes.iter().all(|x| x.eq(sizes.first().unwrap())) {
+                    let size = sizes.first().unwrap();
+                    let mut result = std::vec::Vec::with_capacity(#size);
+                    for i in 0..*size {
+                        #(
+                            let mut #function_arguments_name = #function_arguments_name_vec.pop().unwrap();
+                        )*
+                        result.push((||{
+                            #function_body
+                        })())
+                    }
+                    result
+                } else {
+                    panic!("The size of vectors are not equal.");
+                }
+            }
+        })
+    }
 }
 
 fn parse_ident(ast: &syn::ItemFn) -> syn::Ident {
-    syn::Ident::new(&format!("{}_vec", &ast.sig.ident), ast.sig.ident.span())
+    extend_ident_with_vec(&ast.sig.ident)
 }
 
 fn parse_generics(ast: &syn::ItemFn) -> syn::ImplGenerics<'_> {
     let (impl_generics, _, _) = ast.sig.generics.split_for_impl();
     impl_generics
+}
+
+fn parse_arguments_number(ast: &syn::ItemFn) -> usize {
+    ast.sig.inputs.iter().len()
 }
 
 fn parse_arguments(
@@ -75,13 +106,11 @@ fn parse_arguments(
                     panic!("Vectorization on member functions is not currently supported.")
                 }
                 syn::FnArg::Typed(pat_type) => match &*pat_type.pat {
-                    syn::Pat::Ident(syn::PatIdent { ident, .. }) => {
-                        syn::Ident::new(&format!("{}_vec", &ident), ident.span())
-                    }
+                    syn::Pat::Ident(syn::PatIdent { ident, .. }) => extend_ident_with_vec(&ident),
                     syn::Pat::Tuple(pat_tuple) => {
                         panic!("Unsupported tuple pattern\n{:#?}", pat_tuple)
                     }
-                    v => panic!("unsupported pattern type\n{:#?}", v),
+                    v => panic!("Unsupported pattern type\n{:#?}", v),
                 },
             })
             .collect(),
