@@ -1,30 +1,17 @@
-#[allow(dead_code)]
-#[macro_use]
-extern crate otto_vec;
+# otto_vec
 
-#[otto_vec]
-pub fn function_1(a: i32, b: i32) -> i32 {
-    a + b
-}
+> Automatically vectorize any pure functions!
 
+If a function is pure, this procedural macro should be able to vectorize it for free.
+
+## Example
+
+```rust
 #[otto_vec]
 pub fn function_2<X: Into<i32>, Y: Into<i32>>(a: X, b: Y) -> i32 {
     let result = 10;
     result * a.into() + b.into()
 }
-
-/// This application exists solely for development purposes.
-/// In particular, we can see what the macros expand into.
-fn main() {}
-
-#[test]
-fn test_function_1() {
-    let expected = vec![2, 5, 7, 12, 3];
-    let vector_1 = vec![1, 3, 3, 7, 2];
-    let vector_2 = vec![1, 2, 4, 5, 1];
-    assert_eq!(expected, function_1_vec(vector_1, vector_2));
-}
-
 #[test]
 fn test() {
     #[derive(Debug, Eq, PartialEq)]
@@ -46,3 +33,8 @@ fn test() {
     let vector_2 = vec![S::new(1), S::new(2), S::new(4), S::new(5), S::new(1)];
     assert_eq!(expected, function_2_vec(vector_1, vector_2));
 }
+```
+
+## Todo
+
+1.  Make retaining the original function optional --- In general, we want more configurations available.

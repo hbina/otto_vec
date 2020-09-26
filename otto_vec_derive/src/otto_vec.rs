@@ -1,5 +1,3 @@
-use quote::TokenStreamExt;
-
 pub fn impl_otto_vec_macro(ast: syn::ItemFn) -> proc_macro::TokenStream {
     let function_name = parse_ident(&ast);
     let function_generics = parse_generics(&ast);
