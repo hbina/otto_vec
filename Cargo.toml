@@ -1,0 +1,2 @@
+[workspace]
+members = ["otto_vec_derive" , "otto_vec"]
