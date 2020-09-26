@@ -28,9 +28,9 @@ pub fn impl_otto_vec_macro(ast: syn::ItemFn) -> proc_macro::TokenStream {
                     #(
                         let mut #function_arguments_name = #function_arguments_name_vec.pop().unwrap();
                     )*
-                    result.push({
+                    result.push((||{
                         #function_body
-                    })
+                    })())
                 }
                 result
             } else {
