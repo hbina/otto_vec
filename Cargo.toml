@@ -1,2 +1,2 @@
 [workspace]
-members = ["otto_vec_derive" , "otto_vec"]
+members = ["otto_vec_derive" , "otto_vec", "otto_vec_testbed"]
