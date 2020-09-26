@@ -1,13 +1,13 @@
-use proc_macro::TokenStream;
-use proc_macro2::{Ident, Span};
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, Meta};
 
 use crate::util::get_ident_if_field_is_option;
 
-pub fn impl_derive_macro(ast: DeriveInput) -> TokenStream {
+pub fn impl_derive_macro(ast: syn::DeriveInput) -> proc_macro::TokenStream {
     let struct_name = ast.ident;
-    let builder_name = Ident::new(&format!("{}Builder", struct_name), Span::call_site());
+    let builder_name = syn::Ident::new(
+        &format!("{}Builder", struct_name),
+        proc_macro2::Span::call_site(),
+    );
 
     let struct_fields = if let syn::Data::Struct(syn::DataStruct {
         fields: syn::Fields::Named(syn::FieldsNamed { ref named, .. }),
@@ -41,10 +41,6 @@ pub fn impl_derive_macro(ast: DeriveInput) -> TokenStream {
     });
 
     let methods = struct_fields.iter().map(|field| {
-        field.attrs.iter().for_each(|attr|{
-            if  let Ok(meta) = attr.parse_meta() {
-            }
-        });
         let field_name = &field.ident;
         let field_type = &field.ty;
         get_ident_if_field_is_option(field)
@@ -102,5 +98,5 @@ pub fn impl_derive_macro(ast: DeriveInput) -> TokenStream {
         }
     };
 
-    TokenStream::from(expanded)
+    proc_macro::TokenStream::from(expanded)
 }

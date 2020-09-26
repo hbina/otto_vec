@@ -1,8 +1,3 @@
-use proc_macro::TokenStream;
-use proc_macro2::{Ident, Span};
-use quote::quote;
-use syn::{parse_macro_input, DeriveInput, Meta};
-
 pub fn get_ident_if_field_is_option(field: &syn::Field) -> Option<syn::Type> {
     if let syn::Type::Path(syn::TypePath {
         path: syn::Path { ref segments, .. },
