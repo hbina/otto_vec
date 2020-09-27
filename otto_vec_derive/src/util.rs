@@ -6,7 +6,6 @@ pub fn get_ident_if_field_is_option(field: &syn::Field) -> Option<syn::Type> {
     {
         if let Some(path_segment) = segments.first() {
             if path_segment.ident == "Option" {
-                // <--- HOW TO AVOID THIS HACK?
                 if let syn::PathArguments::AngleBracketed(syn::AngleBracketedGenericArguments {
                     ref args,
                     ..
@@ -19,5 +18,5 @@ pub fn get_ident_if_field_is_option(field: &syn::Field) -> Option<syn::Type> {
             }
         }
     }
-    return None;
+    None
 }
