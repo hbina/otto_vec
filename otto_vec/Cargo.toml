@@ -3,8 +3,10 @@ name = "otto_vec"
 version = "0.1.0"
 authors = ["Hanif Bin Ariffin <hanif.ariffin.4326@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "Exposes the trait that can automatically vectorize pure functions."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-otto_vec_derive = { version ="0.0.1", path = "../otto_vec_derive" }
+otto_vec_derive = { version ="0.1.0", path = "../otto_vec_derive" }

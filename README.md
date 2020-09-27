@@ -39,22 +39,4 @@ fn test() {
 
 1.  Make retaining the original function optional --- In general, we want more configurations available.
 2.  Mirror function visibility.
-3.  Extend to support tuple. Maybe others as well!
-4.  Supports arbitrary argument.
-
-Rust provides a plethora of ways to declare arguments.
-For example, something like,
-
-```rust
-struct Location {
-    x: i64,
-    y: i64,
-}
-
-#[otto_vec]
-pub fn function_4((Location { x, .. }, Location { y, .. }): (Location, Location)) -> i64 {
-    x * y
-}
-```
-
-is not supported.
+3.  Check this macro works wit all the ways argument bindings in Rust.
